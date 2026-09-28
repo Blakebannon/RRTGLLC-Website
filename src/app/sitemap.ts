@@ -9,8 +9,9 @@ const routes: { path: string; priority: number }[] = [
   { path: "/services", priority: 0.9 },
   ...services.map((s) => ({ path: s.href, priority: 0.8 })),
   { path: "/contact", priority: 0.8 },
+  { path: "/work", priority: 0.7 },
   { path: "/about", priority: 0.6 },
-  // /products and /work are omitted until they have published content (see src/data/navigation.ts).
+  // /products is omitted until it has published content (see src/data/navigation.ts).
   { path: "/privacy", priority: 0.2 },
   { path: "/terms", priority: 0.2 },
 ];

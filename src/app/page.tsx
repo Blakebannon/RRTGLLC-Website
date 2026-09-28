@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { mailto, site } from "@/data/site";
 import { services } from "@/data/services";
+import { homepageProjects } from "@/data/work";
 import { assessment, ongoingPricing, projectPricing, formatPrice, PRICING_STATEMENT } from "@/data/pricing";
 import { pageMetadata } from "@/lib/metadata";
 import { Container } from "@/components/ui/Container";
@@ -46,6 +47,7 @@ export default function HomePage() {
       <Problem />
       <Services />
       <WhyRRTG />
+      <SelectedWork />
       <Process />
       <Accessible />
       <Pricing />
@@ -233,13 +235,47 @@ function WhyRRTG() {
   );
 }
 
+function SelectedWork() {
+  return (
+    <section aria-labelledby="work-heading" className="pt-24 sm:pt-32">
+      <Container>
+        <div className="reveal flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+          <SectionHeader index="04" eyebrow="Selected work" id="work-heading" title="We build the systems we talk about." />
+          <TextLink href="/work" className="shrink-0 lg:mb-2">
+            View Our Work
+          </TextLink>
+        </div>
+        <ul className="reveal mt-12 border-t border-line sm:mt-14">
+          {homepageProjects.map((p) => (
+            <li key={p.slug} className="border-b border-line">
+              <Link
+                href={`/work#${p.slug}`}
+                className="group grid gap-2 py-7 sm:py-8 lg:grid-cols-12 lg:items-baseline lg:gap-10"
+              >
+                <span className="flex items-center gap-3 text-title font-medium text-bone transition-colors group-hover:text-rock-300 lg:col-span-4">
+                  {p.name}
+                  <ArrowRight className="size-5 text-mist-dim group-hover:text-rock-400" />
+                </span>
+                <span className="label text-sand-400 lg:col-span-3">{p.classification.join(" · ")}</span>
+                <span className="mt-1 text-[0.9375rem] leading-relaxed text-mist lg:col-span-5 lg:mt-0">
+                  {p.shortDescription}
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </Container>
+    </section>
+  );
+}
+
 function Process() {
   return (
     <section aria-labelledby="process-heading" className="py-24 sm:py-32">
       <Container>
         <SectionHeader
           className="reveal"
-          index="04"
+          index="05"
           eyebrow="How we work"
           id="process-heading"
           title="From first conversation to production."
@@ -264,7 +300,7 @@ function Accessible() {
       <div aria-hidden="true" className="absolute inset-0 -z-10 bg-gradient-to-r from-ink-900 via-ink-900/90 to-ink-900/40" />
       <Container className="grid gap-12 py-24 sm:py-32 lg:grid-cols-12 lg:gap-10 lg:py-40">
         <div className="reveal lg:col-span-6">
-          <Eyebrow index="05">Our position</Eyebrow>
+          <Eyebrow index="06">Our position</Eyebrow>
           <h2 id="accessible-heading" className="mt-6 text-headline font-medium text-bone">
             Big-company technology. <span className="text-sand-300">Small-business practicality.</span>
           </h2>
@@ -296,7 +332,7 @@ function Pricing() {
     <section aria-labelledby="pricing-heading" className="py-24 sm:py-32">
       <Container className="grid gap-14 lg:grid-cols-12 lg:gap-10">
         <div className="reveal lg:col-span-4">
-          <Eyebrow index="06">Investment</Eyebrow>
+          <Eyebrow index="07">Investment</Eyebrow>
           <h2 id="pricing-heading" className="mt-6 text-headline font-medium text-bone">
             Clear starting points.
           </h2>

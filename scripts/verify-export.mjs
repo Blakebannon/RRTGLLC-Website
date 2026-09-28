@@ -31,7 +31,7 @@ const ROUTES = [
  * exist, but must not be linked from other pages or listed in the sitemap.
  * See src/data/navigation.ts.
  */
-const UNLISTED_ROUTES = ["/products", "/work"];
+const UNLISTED_ROUTES = ["/products"];
 const REQUIRED_FILES = ["sitemap.xml", "robots.txt", "_headers", "404.html", "icon.svg", "og.png"];
 
 const errors = [];

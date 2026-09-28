@@ -51,7 +51,7 @@ npm run dev          # http://localhost:3000
 - every internal link and `#anchor` resolves;
 - every `mailto:` link targets the business address;
 - the build contains no `<form>` elements and no placeholder text;
-- unlisted routes (`/products`, `/work`) are built but not linked from other pages or listed in the sitemap;
+- unlisted routes (currently `/products`) are built but not linked from other pages or listed in the sitemap;
 - the sitemap lists every published route on the production domain, `robots.txt` doesn't block the site, and `_headers` sets no `X-Robots-Tag`;
 - `sitemap.xml`, `robots.txt`, `_headers`, `og.png` and `404.html` exist.
 
@@ -75,10 +75,11 @@ src/
     layout/                 Header, MobileNav (client), Footer
     sections/               PageHero, SectionHeader, ServicePage template, CTASection,
                             ProcessSteps, PriceRow, CapabilityGrid, LegalPage,
-                            ProductCard, CaseStudyCard
+                            ProjectEntry, ProductCard, CaseStudyCard
     ui/                     Button/TextLink, Container, Eyebrow, Logo, Icons,
                             EmailAddress, CopyButton (client)
-    graphics/               Topography, Strata and their geometry helpers
+    graphics/               Topography, Strata, ProjectFigure (schematic illustrations)
+                            and their geometry helpers
     seo/                    JsonLd (Organization, WebSite, Service, BreadcrumbList), Analytics
   data/                     All marketing content, kept separate from rendering code
     site.ts                 Company facts, email, mailto() helper
@@ -86,7 +87,8 @@ src/
     pricing.ts              Starting prices, web packages, ongoing plans
     process.ts navigation.ts
     products.ts             Empty until products are approved for release
-    case-studies.ts         Empty until case studies are approved
+    work.ts                 Portfolio projects shown on /work and the homepage
+    case-studies.ts         Client case studies; empty until approved
     team.ts                 Empty until founder/leadership bios are supplied
   lib/metadata.ts           Per-page metadata helper (canonical, Open Graph, Twitter)
 public/_headers             Cloudflare Pages security and cache headers
@@ -98,8 +100,10 @@ scripts/                    verify-export.mjs, flatten-segment-files.mjs
 Most copy changes happen in `src/data/*`, not in page files.
 
 - **Prices:** `src/data/pricing.ts` and `startingPrice` in `src/data/services.ts`
-- **Products and Work (unlisted at launch):** `/products` and `/work` are built but kept out of the navigation, the footer and the sitemap until real content exists. To publish one:
-  1. Add entries to `products` in `src/data/products.ts` or to `caseStudies` in `src/data/case-studies.ts` (case studies only with client permission and verifiable outcomes). The page switches to its populated layout automatically.
+- **Work portfolio:** projects live in `src/data/work.ts`. Each is labeled for what it is (RRTG product, RRTG project, business application, R&D). `featured` entries get the full editorial layout, the rest appear under Additional R&D, `homepage` entries appear in the homepage Selected Work section, and `public: false` hides an entry. Each project uses an approved `image` if one is set, and otherwise one of the built-in schematic `figure` illustrations. Don't add metrics, customers or testimonials that aren't real and approved.
+- **Client case studies:** add entries to `caseStudies` in `src/data/case-studies.ts`, only with client permission and verifiable outcomes. A "Client case studies" section appears on `/work` automatically.
+- **Products (unlisted at launch):** `/products` is built but kept out of the navigation, the footer and the sitemap until approved products exist. To publish it:
+  1. Add entries to `products` in `src/data/products.ts`. The page switches to its product grid automatically.
   2. Add the route to `primaryNav` and `companyNav` in `src/data/navigation.ts`, and to `src/app/sitemap.ts`.
   3. Remove it from `UNLISTED_ROUTES` in `scripts/verify-export.mjs`.
 - **Leadership:** add entries to `team` in `src/data/team.ts`. A Leadership section appears on the About page.
