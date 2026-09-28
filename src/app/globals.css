@@ -1,0 +1,235 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------
+   Design tokens
+   Warm graphite base, sandstone neutrals, red-rock accent.
+   Text colours are chosen to keep >= 4.5:1 contrast on every surface.
+------------------------------------------------------------------- */
+@theme {
+  --color-ink-950: #0b0a09; /* page background */
+  --color-ink-900: #100f0d; /* alternate band */
+  --color-ink-850: #161412; /* raised panel */
+  --color-ink-800: #1d1a17;
+  --color-ink-700: #2a2622;
+
+  --color-bone: #efe8de; /* primary text */
+  --color-mist: #b3a99d; /* secondary text */
+  --color-mist-dim: #8f857a; /* tertiary text, still AA on all surfaces */
+
+  --color-sand-200: #ecd9bf;
+  --color-sand-300: #dcc3a0;
+  --color-sand-400: #c7a57a;
+
+  --color-rock-300: #f0a57f;
+  --color-rock-400: #e3895c; /* accent text on dark */
+  --color-rock-500: #d06b3d; /* primary actions */
+  --color-rock-600: #b4552b;
+  --color-rock-700: #7d3a1f;
+
+  --color-line: rgb(239 232 222 / 0.09);
+  --color-line-strong: rgb(239 232 222 / 0.17);
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Fluid display scale */
+  --text-display: clamp(2.6rem, 1.35rem + 5.4vw, 6.25rem);
+  --text-display--line-height: 0.98;
+  --text-display--letter-spacing: -0.042em;
+  --text-headline: clamp(2rem, 1.3rem + 2.9vw, 3.75rem);
+  --text-headline--line-height: 1.04;
+  --text-headline--letter-spacing: -0.035em;
+  --text-title: clamp(1.5rem, 1.15rem + 1.3vw, 2.25rem);
+  --text-title--line-height: 1.15;
+  --text-title--letter-spacing: -0.025em;
+  --text-lede: clamp(1.075rem, 0.99rem + 0.4vw, 1.3rem);
+  --text-lede--line-height: 1.6;
+
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+
+  --animate-rise: rise 0.9s var(--ease-out-quart) both;
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      translate: 0 1.25rem;
+    }
+  }
+}
+
+/* ------------------------------------------------------------------
+   Base
+------------------------------------------------------------------- */
+@layer base {
+  html {
+    color-scheme: dark;
+    background-color: var(--color-ink-950);
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    scroll-padding-top: 5.5rem;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  body {
+    background-color: var(--color-ink-950);
+    color: var(--color-bone);
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "cv11";
+  }
+
+  ::selection {
+    background-color: var(--color-rock-500);
+    color: var(--color-ink-950);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-rock-400);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Lock page scroll while the mobile navigation dialog is open. */
+  html:has(dialog[open]) {
+    overflow: hidden;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Components
+------------------------------------------------------------------- */
+@layer components {
+  /* Mono technical label used for eyebrows, indices and metadata. */
+  .label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    line-height: 1rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* Long-form content (legal pages). */
+  .prose-rrtg {
+    color: var(--color-mist);
+    font-size: 1.0625rem;
+    line-height: 1.75;
+  }
+  .prose-rrtg > * + * {
+    margin-top: 1.1em;
+  }
+  .prose-rrtg h2 {
+    color: var(--color-bone);
+    font-size: 1.375rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+    margin-top: 2.5em;
+  }
+  .prose-rrtg ul {
+    list-style: none;
+    padding-left: 0;
+  }
+  .prose-rrtg li {
+    position: relative;
+    padding-left: 1.5em;
+  }
+  .prose-rrtg li + li {
+    margin-top: 0.5em;
+  }
+  .prose-rrtg li::before {
+    content: "";
+    position: absolute;
+    left: 0.25em;
+    top: 0.8em;
+    width: 0.6em;
+    height: 1px;
+    background: var(--color-rock-400);
+  }
+  .prose-rrtg a {
+    color: var(--color-bone);
+    overflow-wrap: anywhere;
+    text-decoration: underline;
+    text-decoration-color: var(--color-rock-500);
+    text-underline-offset: 0.2em;
+  }
+  .prose-rrtg a:hover {
+    color: var(--color-rock-300);
+  }
+  .prose-rrtg strong {
+    color: var(--color-bone);
+    font-weight: 500;
+  }
+
+  /* Faint engineering grid used behind heroes. */
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, var(--color-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--color-line) 1px, transparent 1px);
+    background-size: 72px 72px;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Motion — progressive enhancement only. Content is fully visible
+   without JavaScript and in browsers without scroll-driven animations.
+------------------------------------------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 5% cover 22%;
+    }
+  }
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    translate: 0 1.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Mobile navigation dialog entry. */
+dialog.mobile-nav {
+  opacity: 0;
+  transition:
+    opacity 0.25s var(--ease-out-quart),
+    display 0.25s allow-discrete,
+    overlay 0.25s allow-discrete;
+}
+dialog.mobile-nav[open] {
+  opacity: 1;
+}
+@starting-style {
+  dialog.mobile-nav[open] {
+    opacity: 0;
+  }
+}
+dialog.mobile-nav::backdrop {
+  background: transparent;
+}
