@@ -4,8 +4,9 @@ import { mailto } from "@/data/site";
 import { services, type Service } from "@/data/services";
 import { assessment, formatPrice } from "@/data/pricing";
 import { processSteps } from "@/data/process";
+import { projects } from "@/data/work";
 import { Container } from "@/components/ui/Container";
-import { Button } from "@/components/ui/Button";
+import { Button, TextLink } from "@/components/ui/Button";
 import { ArrowRight } from "@/components/ui/Icons";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { PageHero } from "./PageHero";
@@ -79,9 +80,13 @@ export function ServicePage({ service, children, investment, terrainSeed = 2.2 }
 
       {children}
 
+      <RelatedWork service={service} />
+
       {investment ?? <Investment service={service} />}
 
       <HowWeWork />
+
+      <FAQ service={service} />
 
       <RelatedServices related={related} />
 
@@ -143,6 +148,98 @@ function HowWeWork() {
             </li>
           ))}
         </ol>
+      </Container>
+    </section>
+  );
+}
+
+/** First-party proof: RRTG projects on /work that use the same capabilities. */
+function RelatedWork({ service }: { service: Service }) {
+  const items = service.relatedWork.flatMap((rw) => {
+    const project = projects.find((p) => p.slug === rw.slug && p.public);
+    return project ? [{ project, note: rw.note }] : [];
+  });
+  if (items.length === 0) return null;
+
+  return (
+    <section aria-labelledby="related-work-heading" className="border-t border-line py-24 sm:py-28">
+      <Container className="grid gap-12 lg:grid-cols-12 lg:gap-10">
+        <div className="reveal lg:col-span-4">
+          <Eyebrow>In practice</Eyebrow>
+          <h2 id="related-work-heading" className="mt-6 text-title font-medium text-bone">
+            We build these systems ourselves.
+          </h2>
+          <p className="mt-6 text-[1.0625rem] leading-relaxed text-mist">
+            Red Rocks Technology Group develops its own commercial and experimental systems across applied AI,
+            automation, simulation and desktop software.
+          </p>
+          <TextLink href="/work" className="mt-7">
+            See all of our work
+          </TextLink>
+        </div>
+        <ul className="reveal border-t border-line lg:col-span-7 lg:col-start-6">
+          {items.map(({ project, note }) => (
+            <li key={project.slug} className="border-b border-line">
+              <Link href={`/work#${project.slug}`} className="group flex items-start justify-between gap-6 py-6">
+                <span>
+                  <span className="block text-lg font-medium tracking-[-0.015em] text-bone transition-colors group-hover:text-rock-300">
+                    {project.name}
+                  </span>
+                  <span className="label mt-1.5 block text-sand-400">{project.classification.join(" · ")}</span>
+                  <span className="mt-3 block text-[0.9375rem] leading-relaxed text-mist">{note}</span>
+                </span>
+                <ArrowRight className="mt-1.5 shrink-0 text-mist-dim group-hover:text-rock-400" />
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </Container>
+    </section>
+  );
+}
+
+/** Common questions, answered with native <details> so no JavaScript is needed. */
+function FAQ({ service }: { service: Service }) {
+  if (service.faqs.length === 0) return null;
+
+  return (
+    <section aria-labelledby="faq-heading" className="border-t border-line py-24 sm:py-28">
+      <Container className="grid gap-12 lg:grid-cols-12 lg:gap-10">
+        <div className="reveal lg:col-span-4">
+          <Eyebrow>Questions</Eyebrow>
+          <h2 id="faq-heading" className="mt-6 text-title font-medium text-bone">
+            Common questions
+          </h2>
+          <p className="mt-6 text-[1.0625rem] leading-relaxed text-mist">
+            Something else on your mind?{" "}
+            <a
+              href={mailto(service.inquirySubject)}
+              className="text-bone underline decoration-rock-500 underline-offset-4 hover:text-rock-300"
+            >
+              Ask us directly
+            </a>
+            .
+          </p>
+        </div>
+        <div className="reveal border-t border-line lg:col-span-7 lg:col-start-6">
+          {service.faqs.map((faq) => (
+            <details key={faq.question} className="group border-b border-line">
+              <summary className="flex cursor-pointer list-none items-start justify-between gap-6 py-5 [&::-webkit-details-marker]:hidden">
+                <h3 className="text-[1.0625rem] leading-snug font-medium text-bone transition-colors group-hover:text-rock-300">
+                  {faq.question}
+                </h3>
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 16 16"
+                  className="mt-1 size-4 shrink-0 text-rock-400 transition-transform duration-300 group-open:rotate-45"
+                >
+                  <path d="M8 2.5v11M2.5 8h11" stroke="currentColor" strokeWidth="1.5" />
+                </svg>
+              </summary>
+              <p className="max-w-2xl pb-6 text-[0.9375rem] leading-relaxed text-mist">{faq.answer}</p>
+            </details>
+          ))}
+        </div>
       </Container>
     </section>
   );

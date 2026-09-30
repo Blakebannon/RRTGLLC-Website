@@ -23,6 +23,7 @@ export function Footer() {
             </Link>
             <p className="mt-6 max-w-sm text-[0.9375rem] leading-relaxed text-mist">
               Custom software, AI systems, workflow automation and web engineering for small and mid-sized businesses.
+              Rooted in Colorado, working with clients wherever they are.
             </p>
             <div className="mt-8">
               <p className={columnHeading}>Email</p>

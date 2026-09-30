@@ -10,9 +10,9 @@ import { CTASection } from "@/components/sections/CTASection";
 import { JsonLd, breadcrumbSchema } from "@/components/seo/JsonLd";
 
 export const metadata = pageMetadata({
-  title: "Our Work",
+  title: "Software, AI & Automation Projects",
   description:
-    "Explore software, AI, automation and simulation projects engineered by Red Rocks Technology Group.",
+    "Software, applied AI, automation and simulation projects designed and engineered by Red Rocks Technology Group, from commercial products to R&D prototypes.",
   path: "/work",
 });
 
@@ -24,7 +24,7 @@ export default function WorkPage() {
       <JsonLd data={breadcrumbSchema(crumbs)} />
       <PageHero
         breadcrumbs={crumbs}
-        title="Our Work"
+        title="Software, AI and automation projects."
         intro={
           <>
             <p className="text-bone">

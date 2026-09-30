@@ -1,4 +1,6 @@
+import Link from "next/link";
 import type { WorkProject } from "@/data/work";
+import { services } from "@/data/services";
 import { ProjectFigure, figureCaption } from "@/components/graphics/ProjectFigure";
 
 /**
@@ -42,6 +44,7 @@ export function FeaturedProject({ project, index }: { project: WorkProject; inde
           </p>
         )}
         <Capabilities items={project.capabilities} />
+        <RelatedServices project={project} className="mt-6" />
       </div>
 
       <figure className={`reveal lg:col-span-5 ${flipped ? "lg:order-1 lg:col-start-1" : "lg:col-start-8"} lg:self-start`}>
@@ -82,7 +85,28 @@ export function AdditionalProject({ project }: { project: WorkProject }) {
       {project.status && <p className="label mt-2 text-mist-dim">{project.status}</p>}
       <p className="mt-4 text-[0.9375rem] leading-relaxed text-mist">{project.shortDescription}</p>
       <p className="mt-5 text-sm leading-relaxed text-mist-dim">{project.capabilities.join(" · ")}</p>
+      <RelatedServices project={project} className="mt-5" />
     </article>
+  );
+}
+
+/** Links a project back to the services it demonstrates. */
+function RelatedServices({ project, className = "" }: { project: WorkProject; className?: string }) {
+  const linked = services.filter((s) => project.services.includes(s.slug));
+  if (linked.length === 0) return null;
+  return (
+    <p className={`flex flex-wrap items-baseline gap-x-4 gap-y-2 text-[0.9375rem] ${className}`}>
+      <span className="label text-mist-dim">Related services</span>
+      {linked.map((s) => (
+        <Link
+          key={s.slug}
+          href={s.href}
+          className="text-mist underline decoration-line-strong underline-offset-4 transition-colors hover:text-bone hover:decoration-rock-400"
+        >
+          {s.name}
+        </Link>
+      ))}
+    </p>
   );
 }
 

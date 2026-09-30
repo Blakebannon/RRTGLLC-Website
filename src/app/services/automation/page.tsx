@@ -7,7 +7,7 @@ import { ServicePage } from "@/components/sections/ServicePage";
 const service = getService("automation");
 
 export const metadata = pageMetadata({
-  title: service.name,
+  title: service.seoTitle,
   description: service.metaDescription,
   path: service.href,
 });

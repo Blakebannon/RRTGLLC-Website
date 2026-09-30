@@ -9,6 +9,8 @@
  * ./case-studies.ts.
  */
 
+import type { ServiceSlug } from "./services";
+
 /** Built-in schematic illustration used when no approved project imagery exists. */
 export type ProjectFigure = "telemetry" | "orbits" | "retrieval" | "reconciliation";
 
@@ -26,6 +28,8 @@ export type WorkProject = {
   takeaway?: string;
   /** Kept short; shown on demand on the Work page. */
   capabilities: string[];
+  /** Services this project demonstrates, linked from its entry on /work. */
+  services: ServiceSlug[];
   /** Featured projects get full editorial treatment; the rest appear under Additional R&D. */
   featured: boolean;
   /** Shown in the homepage Selected Work section. */
@@ -63,6 +67,7 @@ export const projects: WorkProject[] = [
       "Cloud-backed production infrastructure",
       "Monitoring and backups",
     ],
+    services: ["artificial-intelligence", "software-development"],
     featured: true,
     homepage: true,
     figure: "telemetry",
@@ -91,6 +96,7 @@ export const projects: WorkProject[] = [
       "Data-driven content",
       "Automated testing",
     ],
+    services: ["software-development"],
     featured: true,
     homepage: true,
     figure: "orbits",
@@ -115,6 +121,7 @@ export const projects: WorkProject[] = [
       "Synthesis, critique and revision",
       "Structured output",
     ],
+    services: ["artificial-intelligence", "automation"],
     featured: true,
     homepage: true,
     figure: "retrieval",
@@ -141,6 +148,7 @@ export const projects: WorkProject[] = [
       "Structured exports",
       "Local desktop processing",
     ],
+    services: ["software-development", "automation"],
     featured: true,
     figure: "reconciliation",
     public: true,
@@ -160,6 +168,7 @@ export const projects: WorkProject[] = [
       "Human review",
       "Unreal Engine integration",
     ],
+    services: ["artificial-intelligence"],
     featured: false,
     public: true,
   },
@@ -181,6 +190,7 @@ export const projects: WorkProject[] = [
       "Input remapping",
       "Legacy-system integration",
     ],
+    services: ["software-development"],
     featured: false,
     public: true,
   },

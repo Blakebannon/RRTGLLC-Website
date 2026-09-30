@@ -11,12 +11,13 @@ import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Topography } from "@/components/graphics/Topography";
 import { Strata } from "@/components/graphics/Strata";
 import { SectionHeader } from "@/components/sections/SectionHeader";
+import { JsonLd, websiteSchema } from "@/components/seo/JsonLd";
 import { ProcessSteps } from "@/components/sections/ProcessSteps";
 import { PriceRow } from "@/components/sections/PriceRow";
 import { CTASection } from "@/components/sections/CTASection";
 
 export const metadata = pageMetadata({
-  title: `${site.name} | Software, AI, Automation & Web Engineering`,
+  title: site.homeTitle,
   description: site.description,
   path: "/",
   absoluteTitle: true,
@@ -29,6 +30,8 @@ const indexCellBorders = [
   "border-line border-r",
   "border-line",
 ];
+
+const inlineLink = "text-bone underline decoration-line-strong underline-offset-4 transition-colors hover:text-rock-300 hover:decoration-rock-400";
 
 const frictions = [
   "Repetitive administrative work",
@@ -43,6 +46,7 @@ const frictions = [
 export default function HomePage() {
   return (
     <>
+      <JsonLd data={websiteSchema()} />
       <Hero />
       <Problem />
       <Services />
@@ -139,8 +143,19 @@ function Problem() {
             ))}
           </ul>
           <p className="mt-10 text-[1.0625rem] leading-relaxed text-mist">
-            We find where that friction comes from and build practical systems to remove it, whether that means
-            connecting the tools you already have, automating a process or building something new.
+            We find where that friction comes from and build practical systems to remove it, whether that means{" "}
+            <Link href="/services/automation" className={inlineLink}>
+              automating a process
+            </Link>{" "}
+            across the tools you already have, applying{" "}
+            <Link href="/services/artificial-intelligence" className={inlineLink}>
+              AI where it genuinely helps
+            </Link>{" "}
+            or{" "}
+            <Link href="/services/software-development" className={inlineLink}>
+              building custom software
+            </Link>
+            .
           </p>
         </div>
       </Container>

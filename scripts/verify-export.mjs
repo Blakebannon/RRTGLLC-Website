@@ -5,6 +5,11 @@
  * Verifies that every route was emitted, every internal link resolves,
  * every mailto link targets the business address, each page has the basic
  * SEO/accessibility structure we rely on, and production stays indexable.
+ *
+ * SEO checks: unique titles and descriptions, Open Graph/Twitter basics that
+ * match the canonical URL, parseable JSON-LD with the expected entity types,
+ * an exact sitemap, a crawlable robots.txt, image alt/dimensions, and no
+ * development hosts, preview hosts or local filesystem paths in the output.
  */
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative, sep } from "node:path";
@@ -32,6 +37,20 @@ const ROUTES = [
  * See src/data/navigation.ts.
  */
 const UNLISTED_ROUTES = ["/products"];
+const SERVICE_ROUTES = ROUTES.filter((r) => r.startsWith("/services/"));
+/** JSON-LD entity types each route must contain (Organization is required everywhere). */
+const EXPECTED_LD = {
+  "/": ["WebSite"],
+  "/about": ["BreadcrumbList", "Person"],
+  ...Object.fromEntries(SERVICE_ROUTES.map((r) => [r, ["BreadcrumbList", "Service"]])),
+};
+/** Hosts and paths that must never reach production output. */
+const FORBIDDEN_OUTPUT = [
+  [/localhost|127\.0\.0\.1/i, "a localhost URL"],
+  [/\.pages\.dev/i, "a pages.dev preview URL"],
+  [/https?:\/\/www\.redrockstechnologygroup\.com/i, "a non-canonical www URL"],
+  [/[A-Za-z]:(\\+|\/)(Users|AppForge|Windows)\b|OneDrive/i, "a local filesystem path"],
+];
 const REQUIRED_FILES = ["sitemap.xml", "robots.txt", "_headers", "404.html", "icon.svg", "og.png"];
 
 const errors = [];
@@ -110,6 +129,89 @@ for (const file of htmlFiles) {
   }
 }
 
+/* ---------------------------------------------------------------- SEO */
+
+const attr = (html, re) => html.match(re)?.[1];
+const titles = new Map();
+const descriptions = new Map();
+for (const route of ROUTES) {
+  const file = routeFile(route);
+  if (!existsSync(file)) continue;
+  const html = readFileSync(file, "utf8");
+  const canonical = `${SITE_URL}${route === "/" ? "" : route}`;
+
+  const title = attr(html, /<title>([^<]*)<\/title>/);
+  const description = attr(html, /<meta name="description" content="([^"]*)"/);
+  if (!title) fail(`route ${route}: missing <title>`);
+  else if (titles.has(title)) fail(`route ${route}: duplicate title (also ${titles.get(title)})`);
+  else titles.set(title, route);
+  if (description) {
+    if (descriptions.has(description)) fail(`route ${route}: duplicate meta description (also ${descriptions.get(description)})`);
+    else descriptions.set(description, route);
+  }
+
+  const ogUrl = attr(html, /<meta property="og:url" content="([^"]*)"/);
+  if (ogUrl !== canonical) fail(`route ${route}: og:url is ${ogUrl ?? "missing"}, expected ${canonical}`);
+  for (const prop of ["og:title", "og:description", "og:type", "og:site_name", "og:image:width", "og:image:height"]) {
+    if (!new RegExp(`<meta property="${prop}" content="[^"]+"`).test(html)) fail(`route ${route}: missing ${prop}`);
+  }
+  if (!/<meta name="twitter:card" content="summary_large_image"/.test(html)) fail(`route ${route}: missing twitter:card`);
+  if ((html.match(/<link rel="canonical"/g) ?? []).length !== 1) fail(`route ${route}: expected exactly one canonical link`);
+
+  const types = new Set();
+  for (const [, json] of html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) {
+    let data;
+    try {
+      data = JSON.parse(json);
+    } catch {
+      fail(`route ${route}: JSON-LD is not valid JSON`);
+      continue;
+    }
+    for (const entity of [data].flat()) {
+      if (entity["@context"] !== "https://schema.org") fail(`route ${route}: JSON-LD entity without schema.org @context`);
+      [entity["@type"]].flat().forEach((t) => types.add(t));
+      const urls = JSON.stringify(entity).match(/https?:\/\/[^"]+/g) ?? [];
+      const foreign = urls.filter((u) => !u.startsWith(SITE_URL) && !u.startsWith("https://schema.org"));
+      if (foreign.length) fail(`route ${route}: JSON-LD references non-production URL ${foreign[0]}`);
+    }
+  }
+  for (const t of ["Organization", ...(EXPECTED_LD[route] ?? (route === "/" ? [] : ["BreadcrumbList"]))]) {
+    if (!types.has(t)) fail(`route ${route}: JSON-LD missing ${t}`);
+  }
+
+  for (const [img] of html.matchAll(/<img\b[^>]*>/g)) {
+    if (!/\salt="/.test(img)) fail(`route ${route}: <img> without alt attribute`);
+    if (!/\swidth="\d+"/.test(img) || !/\sheight="\d+"/.test(img)) fail(`route ${route}: <img> without width/height`);
+  }
+
+  const text = html.replace(/<script[\s\S]*?<\/script>/g, "");
+  if (/\b(TODO|TBD|FIXME)\b|\[placeholder\]/.test(text)) fail(`route ${route}: contains placeholder text`);
+}
+
+// Organization logo: production URL, present in the export, and a PNG of at least 112×112 px.
+{
+  const home = readFileSync(join(OUT, "index.html"), "utf8");
+  const logo = home.match(/"@type":"Organization"[^<]*?"logo":"([^"]+)"/)?.[1];
+  if (!logo || !logo.startsWith(`${SITE_URL}/`)) fail(`Organization logo is ${logo ?? "missing"}; expected a ${SITE_URL} URL`);
+  else {
+    const file = join(OUT, logo.slice(SITE_URL.length));
+    if (!existsSync(file)) fail(`Organization logo ${logo} is not in the export`);
+    else {
+      const png = readFileSync(file);
+      const isPng = png.subarray(1, 4).toString() === "PNG";
+      const [w, h] = isPng ? [png.readUInt32BE(16), png.readUInt32BE(20)] : [0, 0];
+      if (!isPng || w < 112 || h < 112) fail(`Organization logo must be a PNG of at least 112×112 px (found ${isPng ? `${w}×${h}` : "non-PNG"})`);
+    }
+  }
+}
+
+for (const file of walk(OUT).filter((f) => /\.(html|txt|xml)$/.test(f))) {
+  const content = readFileSync(file, "utf8");
+  for (const [re, what] of FORBIDDEN_OUTPUT) {
+    if (re.test(content)) fail(`${relative(OUT, file).split(sep).join("/")}: contains ${what}`);
+  }
+}
+
 const sitemap = readFileSync(join(OUT, "sitemap.xml"), "utf8");
 const sitemapLocs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
 for (const route of ROUTES) {
@@ -120,10 +222,17 @@ for (const route of ROUTES) {
   }
 }
 if (sitemapLocs.some((l) => !l.startsWith(`${SITE_URL}/`) && l !== SITE_URL)) fail("sitemap contains a non-production URL");
+if (!SITE_URL.startsWith("https://")) fail(`site URL ${SITE_URL} is not HTTPS`);
+if (new Set(sitemapLocs).size !== sitemapLocs.length) fail("sitemap lists a URL more than once");
+const publishedUrls = ROUTES.filter((r) => !UNLISTED_ROUTES.includes(r)).map((r) => `${SITE_URL}${r === "/" ? "" : r}`);
+for (const loc of sitemapLocs) if (!publishedUrls.includes(loc)) fail(`sitemap lists unexpected URL ${loc}`);
+if (/<lastmod>/.test(sitemap)) fail("sitemap has <lastmod>; omit it unless real modification dates are available");
 
 const robots = readFileSync(join(OUT, "robots.txt"), "utf8");
 if (/^\s*Disallow:\s*\/\s*$/im.test(robots)) fail("robots.txt disallows the whole site");
 if (!robots.includes(`Sitemap: ${SITE_URL}/sitemap.xml`)) fail("robots.txt missing production sitemap URL");
+if (!/^\s*Allow:\s*\/\s*$/im.test(robots)) fail("robots.txt does not allow crawling");
+if (/^\s*Disallow:\s*\/(_next|images)/im.test(robots)) fail("robots.txt blocks assets needed to render pages");
 
 const headers = readFileSync(join(OUT, "_headers"), "utf8");
 if (/X-Robots-Tag/i.test(headers)) fail("_headers sets X-Robots-Tag; production must remain indexable");

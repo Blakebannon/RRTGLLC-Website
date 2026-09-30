@@ -1,21 +1,21 @@
 import Link from "next/link";
 import { site } from "@/data/site";
-import { team } from "@/data/team";
 import { pageMetadata } from "@/lib/metadata";
 import { Container } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { ArrowRight } from "@/components/ui/Icons";
 import { PageHero } from "@/components/sections/PageHero";
 import { CTASection } from "@/components/sections/CTASection";
-import { JsonLd, breadcrumbSchema } from "@/components/seo/JsonLd";
+import { JsonLd, breadcrumbSchema, ownerSchema } from "@/components/seo/JsonLd";
 import { Topography } from "@/components/graphics/Topography";
 import { Strata } from "@/components/graphics/Strata";
 
 export const metadata = pageMetadata({
-  title: "About",
+  title: `About ${site.name}`,
   description:
-    "Red Rocks Technology Group is an engineering company that builds practical technology for small and mid-sized businesses: custom software, AI systems, workflow automation, websites, integrations and internal tools.",
+    "Meet Red Rocks Technology Group: an engineering company rooted in Colorado that builds custom software, AI, automation and websites for growing businesses.",
   path: "/about",
+  absoluteTitle: true,
 });
 
 const buildAreas = [
@@ -82,7 +82,7 @@ export default function AboutPage() {
 
   return (
     <>
-      <JsonLd data={breadcrumbSchema(crumbs)} />
+      <JsonLd data={[breadcrumbSchema(crumbs), ownerSchema()]} />
       <PageHero
         breadcrumbs={crumbs}
         title="We build practical technology for small and mid-sized businesses."
@@ -246,28 +246,70 @@ export default function AboutPage() {
         </Container>
       </section>
 
-      {team.length > 0 && (
-        <section aria-labelledby="team-heading" className="py-24 sm:py-32">
-          <Container>
-            <h2 id="team-heading" className="reveal text-headline font-medium text-bone">
-              Leadership
+      {/* Owner */}
+      <section aria-labelledby="owner-heading" className="py-24 sm:py-32">
+        <Container>
+          <div className="reveal max-w-3xl">
+            <Eyebrow index="05">The owner</Eyebrow>
+            <h2 id="owner-heading" className="mt-6 text-headline font-medium text-bone">
+              Meet the owner.
             </h2>
-            <ul className="mt-12 grid gap-12 md:grid-cols-2">
-              {team.map((m) => (
-                <li key={m.name} className="reveal border-t border-line-strong pt-7">
-                  <h3 className="text-xl font-medium text-bone">{m.name}</h3>
-                  <p className="label mt-2 text-rock-400">{m.role}</p>
-                  <div className="mt-5 space-y-4 text-[0.9375rem] leading-relaxed text-mist">
-                    {m.bio.map((p) => (
-                      <p key={p.slice(0, 32)}>{p}</p>
-                    ))}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </Container>
-        </section>
-      )}
+          </div>
+          <div className="mt-14 grid gap-12 lg:mt-16 lg:grid-cols-12 lg:gap-10">
+            <figure className="reveal max-w-sm sm:max-w-md lg:sticky lg:top-32 lg:col-span-5 lg:max-w-none lg:self-start">
+              <div className="border border-line-strong bg-ink-900 p-2 sm:p-3">
+                {/* eslint-disable-next-line @next/next/no-img-element -- static export serves images unoptimized */}
+                <img
+                  src="/images/blake-bannon.jpg"
+                  alt="Blake Bannon, owner of Red Rocks Technology Group"
+                  width={950}
+                  height={950}
+                  loading="lazy"
+                  decoding="async"
+                  className="aspect-[4/5] w-full object-cover"
+                />
+              </div>
+            </figure>
+            <div className="reveal lg:col-span-6 lg:col-start-7">
+              <h3 className="text-title font-medium text-bone">Blake Bannon</h3>
+              <p className="label mt-3 text-rock-400">Owner, {site.name}</p>
+              <p className="mt-8 text-lede text-bone">
+                Blake&apos;s path to building technology did not run only through software. His background includes
+                sales in the oil and gas industry, service as a volunteer firefighter and captaining a college
+                lacrosse team.
+              </p>
+              <div className="mt-6 space-y-5 text-[1.0625rem] leading-relaxed text-mist">
+                <p>
+                  Sales in oil and gas meant working inside complex commercial relationships, where a proposal only
+                  matters if it solves a problem the customer actually values. That is still the test every system we
+                  build has to pass.
+                </p>
+                <p>
+                  Firefighting and leading a team taught the other half of the job: prepare before it matters, stay
+                  effective when circumstances change, and be accountable to the people relying on you. As a captain,
+                  that meant setting expectations, helping teammates improve and keeping everyone working toward the
+                  same objective.
+                </p>
+                <p>
+                  Those environments have little in common on the surface, but the principles carry over directly.
+                  Clients trust {site.name} with systems their businesses depend on. That calls for more than
+                  technical ability. It calls for understanding the objective, being straightforward about what will
+                  and will not work, and taking ownership of what is delivered.
+                </p>
+                <p>
+                  Blake is also the author of <cite className="text-bone">The Pocketbook of AI Terminology</cite>,
+                  which reflects his interest in artificial intelligence and his view that advanced technology should
+                  be understandable and useful to the people who can benefit from it.
+                </p>
+              </div>
+              <p className="mt-8 border-t border-line pt-6 text-[0.9375rem] leading-relaxed text-mist">
+                Outside of work, Colorado and the outdoors are a large part of his life, along with reading and
+                physical training.
+              </p>
+            </div>
+          </div>
+        </Container>
+      </section>
 
       <section aria-labelledby="colorado-heading" className="relative isolate overflow-hidden border-t border-line">
         <Topography

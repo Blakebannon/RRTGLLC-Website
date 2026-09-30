@@ -13,9 +13,9 @@ import { CTASection } from "@/components/sections/CTASection";
 import { JsonLd, breadcrumbSchema } from "@/components/seo/JsonLd";
 
 export const metadata = pageMetadata({
-  title: "Services",
+  title: "Technology Services for Small Businesses",
   description:
-    "Custom software development, artificial intelligence, workflow automation and web engineering for small and mid-sized businesses, delivered by one engineering team.",
+    "Custom software development, AI consulting, workflow automation and website development for small and mid-sized businesses, from one technology partner.",
   path: "/services",
 });
 
@@ -49,8 +49,8 @@ export default function ServicesPage() {
         intro={
           <p>
             Custom software, artificial intelligence, workflow automation and web engineering are four capabilities of
-            one engineering team. Most real business problems involve more than one of them, so we don&apos;t treat
-            them as separate businesses.
+            one engineering team serving small and mid-sized businesses. Most real business problems involve more than
+            one of them, so we don&apos;t treat them as separate businesses.
           </p>
         }
       >

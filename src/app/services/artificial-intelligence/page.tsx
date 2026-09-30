@@ -7,7 +7,7 @@ import { ServicePage } from "@/components/sections/ServicePage";
 const service = getService("artificial-intelligence");
 
 export const metadata = pageMetadata({
-  title: "Artificial Intelligence for Business",
+  title: service.seoTitle,
   description: service.metaDescription,
   path: service.href,
 });

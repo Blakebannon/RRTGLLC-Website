@@ -9,7 +9,7 @@ const service = getService("web-development");
 const websiteSupport = ongoingPricing[0];
 
 export const metadata = pageMetadata({
-  title: "Web Engineering & Business Websites",
+  title: service.seoTitle,
   description: service.metaDescription,
   path: service.href,
 });

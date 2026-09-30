@@ -4,24 +4,23 @@ import { absoluteUrl } from "@/lib/metadata";
 
 export const dynamic = "force-static";
 
-const routes: { path: string; priority: number }[] = [
-  { path: "/", priority: 1 },
-  { path: "/services", priority: 0.9 },
-  ...services.map((s) => ({ path: s.href, priority: 0.8 })),
-  { path: "/contact", priority: 0.8 },
-  { path: "/work", priority: 0.7 },
-  { path: "/about", priority: 0.6 },
+/*
+ * Canonical public routes only. `lastModified` is deliberately omitted: a build
+ * timestamp would claim every page changed on every deploy. `priority` and
+ * `changeFrequency` are omitted because Google ignores them.
+ */
+const routes = [
+  "/",
+  "/services",
+  ...services.map((s) => s.href),
+  "/work",
+  "/about",
+  "/contact",
   // /products is omitted until it has published content (see src/data/navigation.ts).
-  { path: "/privacy", priority: 0.2 },
-  { path: "/terms", priority: 0.2 },
+  "/privacy",
+  "/terms",
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const lastModified = new Date();
-  return routes.map(({ path, priority }) => ({
-    url: absoluteUrl(path),
-    lastModified,
-    changeFrequency: "monthly",
-    priority,
-  }));
+  return routes.map((path) => ({ url: absoluteUrl(path) }));
 }

@@ -53,7 +53,12 @@ npm run dev          # http://localhost:3000
 - the build contains no `<form>` elements and no placeholder text;
 - unlisted routes (currently `/products`) are built but not linked from other pages or listed in the sitemap;
 - the sitemap lists every published route on the production domain, `robots.txt` doesn't block the site, and `_headers` sets no `X-Robots-Tag`;
-- `sitemap.xml`, `robots.txt`, `_headers`, `og.png` and `404.html` exist.
+- `sitemap.xml`, `robots.txt`, `_headers`, `og.png` and `404.html` exist;
+- every page has a unique `<title>` and meta description, exactly one canonical, and Open Graph/Twitter tags whose `og:url` matches the canonical;
+- JSON-LD parses as JSON and contains the expected types (Organization everywhere, WebSite on the homepage, Service and BreadcrumbList on service pages, Person on About);
+- the sitemap lists exactly the published routes, once each, with no `lastmod`, and `robots.txt` allows crawling without blocking assets;
+- every `<img>` has `alt`, `width` and `height`;
+- no output file contains localhost, `*.pages.dev`, `www.` or local filesystem paths.
 
 `postbuild` (`scripts/flatten-segment-files.mjs`) works around a Next.js static-export bug on **Windows**. The exporter writes client prefetch files (`__next.*.txt`) into nested folders instead of the flat file names the router requests, which causes 404s during client-side navigation. The script flattens them. On Linux and macOS, including Cloudflare's build servers, it does nothing.
 
@@ -80,18 +85,18 @@ src/
                             EmailAddress, CopyButton (client)
     graphics/               Topography, Strata, ProjectFigure (schematic illustrations)
                             and their geometry helpers
-    seo/                    JsonLd (Organization, WebSite, Service, BreadcrumbList), Analytics
+    seo/                    JsonLd (Organization, WebSite, Service, BreadcrumbList, Person), Analytics
   data/                     All marketing content, kept separate from rendering code
     site.ts                 Company facts, email, mailto() helper
-    services.ts             The four services and each page's copy
+    services.ts             The four services: page copy, search titles, FAQs, related work
     pricing.ts              Starting prices, web packages, ongoing plans
     process.ts navigation.ts
     products.ts             Empty until products are approved for release
     work.ts                 Portfolio projects shown on /work and the homepage
     case-studies.ts         Client case studies; empty until approved
-    team.ts                 Empty until founder/leadership bios are supplied
   lib/metadata.ts           Per-page metadata helper (canonical, Open Graph, Twitter)
 public/_headers             Cloudflare Pages security and cache headers
+public/images/              Owner portrait; rrtg-logo.png (512px PNG of icon.svg, used as the Organization logo)
 scripts/                    verify-export.mjs, flatten-segment-files.mjs
 ```
 
@@ -106,7 +111,8 @@ Most copy changes happen in `src/data/*`, not in page files.
   1. Add entries to `products` in `src/data/products.ts`. The page switches to its product grid automatically.
   2. Add the route to `primaryNav` and `companyNav` in `src/data/navigation.ts`, and to `src/app/sitemap.ts`.
   3. Remove it from `UNLISTED_ROUTES` in `scripts/verify-export.mjs`.
-- **Leadership:** add entries to `team` in `src/data/team.ts`. A Leadership section appears on the About page.
+- **Owner profile:** the Meet the Owner section is written directly in `src/app/about/page.tsx`; the portrait is `public/images/blake-bannon.jpg`.
+- **Service FAQs and related work:** `faqs` and `relatedWork` on each entry in `src/data/services.ts`. Answers must match approved pricing and policy. Related work refers to project slugs in `src/data/work.ts`, and each project lists the `services` it links back to.
 
 Do not add customers, testimonials, statistics or results that are not real and approved.
 
@@ -168,6 +174,16 @@ Pushes to `main` then deploy to production automatically.
 **What `public/_headers` configures:** HSTS, `X-Content-Type-Options`, `X-Frame-Options: DENY`, a restrictive `Permissions-Policy`, a Content-Security-Policy, and long-lived immutable caching for fingerprinted `/_next/static/*` assets. The CSP allows `'unsafe-inline'` scripts because Next.js static export inlines its bootstrap scripts. A hash- or nonce-based CSP would need a server or build-time hashing step.
 
 **Other hosts:** `out/` is a plain static site that works on any static host. Only `_headers` is Cloudflare-specific. Pretty URLs (`/about` → `about.html`) must be supported by the host, as Cloudflare Pages does by default. Cloudflare Workers Static Assets also works, with `out/` as the assets directory.
+
+## Search engine optimization
+
+Search intent per page, post-launch Search Console steps, Cloudflare redirect settings, content ideas and the off-site authority plan are in **[SEO_ROADMAP.md](SEO_ROADMAP.md)** (internal, not published).
+
+After deployment, in short:
+
+- Redirect `www` and the production `*.pages.dev` alias to `https://redrockstechnologygroup.com` (details in the roadmap). Cloudflare Pages already redirects `/about.html` and `/about/` to `/about`.
+- Verify the domain in Google Search Console via Cloudflare DNS and submit `https://redrockstechnologygroup.com/sitemap.xml`.
+- **Google Business Profile:** create one only if RRTG meets Google's eligibility requirements, meaning it meets customers in person at a staffed location or travels to them as a service-area business. If RRTG operates entirely online and doesn't meet customers in person, don't create one, and never use a virtual office or mailbox address to qualify.
 
 ## Notes for maintainers
 

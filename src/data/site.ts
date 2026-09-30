@@ -6,12 +6,15 @@ export const site = {
   name: "Red Rocks Technology Group",
   legalName: "Red Rocks Technology Group, LLC",
   shortName: "RRTG",
+  owner: "Blake Bannon",
   email: "blake.bannon@redrockstechnologygroup.com",
   /**
    * Canonical production origin. Override with NEXT_PUBLIC_SITE_URL
    * (no trailing slash) if the site is served from a different host.
    */
   url: (process.env.NEXT_PUBLIC_SITE_URL ?? "https://redrockstechnologygroup.com").replace(/\/$/, ""),
+  /** Homepage and default document title. */
+  homeTitle: "Custom Software, AI & Automation for Small Businesses | RRTG",
   description:
     "Red Rocks Technology Group builds custom software, AI systems, workflow automation and high-performance websites for small and mid-sized businesses.",
   capabilities: ["Software", "AI", "Automation", "Web Engineering"],

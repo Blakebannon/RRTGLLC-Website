@@ -11,10 +11,11 @@ import { JsonLd, breadcrumbSchema } from "@/components/seo/JsonLd";
 import { EmailAddress } from "@/components/ui/EmailAddress";
 
 export const metadata = pageMetadata({
-  title: "Contact",
+  title: `Contact ${site.name}`,
   description:
-    "Talk to Red Rocks Technology Group about custom software, AI systems, workflow automation or a new website. Email blake.bannon@redrockstechnologygroup.com.",
+    "Contact Red Rocks Technology Group about custom software, AI, workflow automation or web development. Email blake.bannon@redrockstechnologygroup.com.",
   path: "/contact",
+  absoluteTitle: true,
 });
 
 const helpful = [
