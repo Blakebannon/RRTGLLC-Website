@@ -2,7 +2,7 @@
 
 The corporate website for **Red Rocks Technology Group, LLC**. RRTG builds custom software, AI systems, workflow automation and websites for small and mid-sized businesses.
 
-This is a static marketing site. It has no server, database, authentication or form backend. It builds to plain HTML/CSS/JS and deploys to **Cloudflare Pages**.
+This is a static marketing site. It has no server, database or authentication of its own; the inquiry form on `/contact` submits from the browser to [Web3Forms](https://web3forms.com), an external service. It builds to plain HTML/CSS/JS and deploys to **Cloudflare Pages**.
 
 ---
 
@@ -17,7 +17,7 @@ This is a static marketing site. It has no server, database, authentication or f
 | Graphics    | Topographic and strata SVGs generated at build time. No image or 3D libraries. |
 | Hosting     | Cloudflare Pages (static assets on the global CDN)                       |
 
-Runtime dependencies are limited to `next`, `react` and `react-dom`. Only two components ship client JavaScript: the mobile navigation (a native `<dialog>`) and the "copy email" button. All content renders without JavaScript, and the desktop Services dropdown is CSS-only.
+Runtime dependencies are limited to `next`, `react` and `react-dom`. Only three components ship client JavaScript: the mobile navigation (a native `<dialog>`), the "copy email" button and the inquiry form. All content renders without JavaScript, and the desktop Services dropdown is CSS-only.
 
 ## Prerequisites
 
@@ -50,7 +50,9 @@ npm run dev          # http://localhost:3000
 - every route was emitted with exactly one `<h1>`, a canonical URL on the production domain, a meta description and an OG image, and no `noindex`;
 - every internal link and `#anchor` resolves;
 - every `mailto:` link targets the business address;
-- the build contains no `<form>` elements and no placeholder text;
+- the only `<form>` is the inquiry form on `/contact`: it posts to the Web3Forms endpoint with the expected public access key and `botcheck` honeypot, required fields are marked required, every control has a label, and the direct email link and Privacy link are present;
+- the only Web3Forms URL anywhere in the output (HTML and JS) is the submit endpoint, no private-credential patterns ship, and the CSP allows `https://api.web3forms.com` in `connect-src`/`form-action` without wildcards;
+- the build contains no placeholder text;
 - unlisted routes (currently `/products`) are built but not linked from other pages or listed in the sitemap;
 - the sitemap lists every published route on the production domain, `robots.txt` doesn't block the site, and `_headers` sets no `X-Robots-Tag`;
 - `sitemap.xml`, `robots.txt`, `_headers`, `og.png` and `404.html` exist;
@@ -83,11 +85,13 @@ src/
                             ProjectEntry, ProductCard, CaseStudyCard
     ui/                     Button/TextLink, Container, Eyebrow, Logo, Icons,
                             EmailAddress, CopyButton (client)
+    sections/InquiryForm    Project inquiry form (client)
     graphics/               Topography, Strata, ProjectFigure (schematic illustrations)
                             and their geometry helpers
     seo/                    JsonLd (Organization, WebSite, Service, BreadcrumbList, Person), Analytics
   data/                     All marketing content, kept separate from rendering code
-    site.ts                 Company facts, email, mailto() helper
+    site.ts                 Company facts, email, mailto() helper, INQUIRY_HREF
+    inquiry.ts              Inquiry form: Web3Forms endpoint and public access key, options
     services.ts             The four services: page copy, search titles, FAQs, related work
     pricing.ts              Starting prices, web packages, ongoing plans
     process.ts navigation.ts
@@ -129,16 +133,20 @@ Every variable is optional. Copy `.env.example` to `.env.local` for local overri
 
 > If production is served from `www.` instead of the apex domain, set `NEXT_PUBLIC_SITE_URL` to match and redirect the other host to it in Cloudflare.
 
-## Contact integration status
+## Contact and inquiry form
 
-**This release uses direct email. There is no contact form, on purpose.**
+**The project inquiry form on `/contact` is the primary contact method. Direct email is the fallback.**
 
-- Every "Start a Project", "Discuss Your Project" and "Start a Conversation" CTA opens a `mailto:` link to **blake.bannon@redrockstechnologygroup.com**, with a subject line for the context (for example, `Project Inquiry - Red Rocks Technology Group`).
-- `/contact` shows the address as selectable text, with a mailto button (pre-filled with a short outline) and a progressive-enhancement copy button.
-- The footer shows the address as a visible, clickable link.
-- There is no form backend, no API route and no simulated "message sent" state.
-
-**Possible future upgrade (not implemented):** an on-site inquiry form that posts to a Cloudflare Worker, uses Cloudflare Turnstile for spam protection, and delivers mail through Cloudflare Email Service. The static architecture is compatible with that. It would add a Worker and form component, a Turnstile site key (public) and secret (Worker secret), and updates to the `_headers` CSP (`challenges.cloudflare.com`), `scripts/verify-export.mjs` (which currently fails on `<form>`) and the Privacy page.
+- **Delivery:** the form posts from the visitor's browser to Web3Forms at `https://api.web3forms.com/submit`, which emails each submission to **blake.bannon@redrockstechnologygroup.com** (the address the Web3Forms form was created with). There is no server, API route or Worker of our own.
+- **Configuration:** `src/data/inquiry.ts` holds the endpoint, the access key, the sender name and the select options. The access key is a Web3Forms **public** form key, intentionally visible in the page. It can only submit to this form, so it is not a secret and needs no environment variable or Cloudflare setting.
+- **Email:** the subject is `New RRTG Inquiry — <service>`, built only from the fixed service list. The sender name is "RRTG Website Inquiry". Web3Forms uses the submitted `email` field as the Reply-To, so replying to the notification replies to the visitor.
+- **Behavior:** with JavaScript, the form submits in place and shows "Inquiry received." only after Web3Forms confirms success. Failures and timeouts (15 s) keep everything the visitor typed and show the email address. Without JavaScript, the form posts natively and Web3Forms redirects back to `/contact#inquiry-received`.
+- **Spam:** Web3Forms' `botcheck` honeypot is included. Web3Forms now describes the honeypot as deprecated and recommends a CAPTCHA; if spam becomes a problem, add Web3Forms' free hCaptcha integration (and the matching CSP sources).
+- **CSP:** `public/_headers` allows `https://api.web3forms.com` in `connect-src` (fetch) and `form-action` (native post). Nothing else was broadened.
+- **Rotating or changing the form:** in the Web3Forms dashboard, reset the access key or create a new form (for example, to deliver to a different address), then update `accessKey` in `src/data/inquiry.ts` and `WEB3FORMS_ACCESS_KEY` in `scripts/verify-export.mjs`, and redeploy.
+- **Testing:** `npm run verify` checks the integration without sending anything. To test delivery, submit the form once on a local build (`npm run build && npm run preview`) or on production, and confirm the email arrives. Each real submission sends a real email.
+- **Email fallback:** `/contact` shows the address as a clickable link with a copy button, the footer and closing CTA sections link it, and explicit "email us" links remain `mailto:` links. Primary "Start a Project" / "Discuss Your Project" buttons go to `/contact#inquiry`.
+- **External dependency:** Web3Forms is a production dependency for form delivery (no npm package). If it is unavailable, visitors see the error state with the direct email address.
 
 ## Analytics integration status
 

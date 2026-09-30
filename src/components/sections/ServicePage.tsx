@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { mailto } from "@/data/site";
+import { INQUIRY_HREF, mailto } from "@/data/site";
 import { services, type Service } from "@/data/services";
 import { assessment, formatPrice } from "@/data/pricing";
 import { processSteps } from "@/data/process";
@@ -39,7 +39,7 @@ export function ServicePage({ service, children, investment, terrainSeed = 2.2 }
 
       <PageHero breadcrumbs={crumbs} title={service.headline} intro={<p>{service.intro}</p>} terrain={{ seed: terrainSeed }}>
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:gap-10">
-          <Button href={mailto(service.inquirySubject)} size="lg">
+          <Button href={INQUIRY_HREF} size="lg">
             Discuss Your Project
           </Button>
           <p className="flex items-baseline gap-3">

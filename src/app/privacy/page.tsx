@@ -17,7 +17,7 @@ export const metadata = pageMetadata({
 
 export default function PrivacyPage() {
   return (
-    <LegalPage title="Privacy Policy" path="/privacy" updated="September 28, 2026">
+    <LegalPage title="Privacy Policy" path="/privacy" updated="September 30, 2026">
       <p>
         This policy explains how {site.legalName} (&ldquo;Red Rocks Technology Group,&rdquo; &ldquo;we&rdquo; or
         &ldquo;us&rdquo;) handles information in connection with this website and with inquiries you send us. We aim to
@@ -26,9 +26,15 @@ export default function PrivacyPage() {
 
       <h2>Information we collect</h2>
       <p>
-        <strong>Information you send us.</strong> This website does not have contact forms, user accounts or
-        newsletter sign-ups. If you email us, we receive the information you choose to include, such as your name,
-        email address, company and details about your project.
+        <strong>Information you send us.</strong> This website does not have user accounts or newsletter sign-ups.
+        If you submit the project inquiry form on our Contact page or email us, we receive the information you choose
+        to include, such as your name, email address, company, phone number and details about your project.
+      </p>
+      <p>
+        <strong>Inquiry form.</strong> When you voluntarily submit the project inquiry form, the information you enter
+        is transmitted to Web3Forms, a third-party form delivery service, for the purpose of delivering your inquiry to
+        us by email. Submitting the form does not subscribe you to any mailing list. Please do not include passwords,
+        payment card details or other sensitive information in the form.
       </p>
       <p>
         <strong>Technical information.</strong> Like most websites, our hosting and content delivery provider
@@ -53,7 +59,7 @@ export default function PrivacyPage() {
       <h2>How we share information</h2>
       <p>
         We do not sell your personal information. We share information only with service providers that help us
-        operate, such as our website hosting and email providers, and only as needed for them to provide those
+        operate, such as our website hosting and email providers and the form delivery service described above, and only as needed for them to provide those
         services. We may also disclose information when required by law or to protect our rights and the security of
         our systems.
       </p>

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { primaryNav } from "@/data/navigation";
 import { services } from "@/data/services";
-import { mailto } from "@/data/site";
+import { INQUIRY_HREF } from "@/data/site";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { ArrowRight } from "@/components/ui/Icons";
@@ -64,7 +64,7 @@ export function Header() {
 
         <div className="flex items-center gap-3">
           <div className="hidden sm:block">
-            <Button href={mailto()}>Start a Project</Button>
+            <Button href={INQUIRY_HREF}>Start a Project</Button>
           </div>
           <MobileNav />
         </div>

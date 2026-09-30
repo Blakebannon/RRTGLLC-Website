@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { mailto } from "@/data/site";
+import { INQUIRY_HREF, mailto } from "@/data/site";
 import { services } from "@/data/services";
 import { assessment, formatPrice, ongoingPricing } from "@/data/pricing";
 import { pageMetadata } from "@/lib/metadata";
@@ -55,7 +55,7 @@ export default function ServicesPage() {
         }
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
-          <Button href={mailto()} size="lg">
+          <Button href={INQUIRY_HREF} size="lg">
             Start a Project
           </Button>
           <Button href="#capabilities" variant="secondary" size="lg">

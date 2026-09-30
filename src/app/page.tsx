@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { mailto, site } from "@/data/site";
+import { INQUIRY_HREF, site } from "@/data/site";
 import { services } from "@/data/services";
 import { homepageProjects } from "@/data/work";
 import { assessment, ongoingPricing, projectPricing, formatPrice, PRICING_STATEMENT } from "@/data/pricing";
@@ -84,7 +84,7 @@ function Hero() {
             websites for small and mid-sized businesses.
           </p>
           <div className="mt-11 flex flex-col gap-3 motion-safe:animate-rise motion-safe:[animation-delay:210ms] sm:flex-row sm:gap-4">
-            <Button href={mailto()} size="lg">
+            <Button href={INQUIRY_HREF} size="lg">
               Start a Project
             </Button>
             <Button href="/services" variant="secondary" size="lg">
@@ -352,7 +352,7 @@ function Pricing() {
             Clear starting points.
           </h2>
           <p className="mt-6 text-[1.0625rem] leading-relaxed text-mist">{PRICING_STATEMENT}</p>
-          <Button href={mailto()} variant="secondary" className="mt-9">
+          <Button href={INQUIRY_HREF} variant="secondary" className="mt-9">
             Discuss Your Project
           </Button>
         </div>

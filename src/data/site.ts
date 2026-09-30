@@ -22,6 +22,9 @@ export const site = {
   coordinates: "39.6655° N · 105.2057° W",
 } as const;
 
+/** Primary project calls to action lead to the inquiry form; explicit email links use mailto(). */
+export const INQUIRY_HREF = "/contact#inquiry";
+
 /** Default subject line used by general "contact us" calls to action. */
 export const DEFAULT_SUBJECT = "Project Inquiry - Red Rocks Technology Group";
 

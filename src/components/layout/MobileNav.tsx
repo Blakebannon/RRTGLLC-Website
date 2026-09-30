@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useRef } from "react";
 import { primaryNav, serviceNav } from "@/data/navigation";
-import { mailto } from "@/data/site";
+import { INQUIRY_HREF, mailto } from "@/data/site";
 import { Logo } from "@/components/ui/Logo";
-import { ArrowRight, ArrowUpRight } from "@/components/ui/Icons";
+import { ArrowRight } from "@/components/ui/Icons";
 import { EmailAddress } from "@/components/ui/EmailAddress";
 
 /**
@@ -88,13 +88,13 @@ export function MobileNav() {
           </nav>
 
           <div className="mt-10 space-y-5">
-            <a
-              href={mailto()}
+            <Link
+              href={INQUIRY_HREF}
               className="group flex h-13 w-full items-center justify-center gap-2.5 bg-rock-500 font-medium text-ink-950 hover:bg-rock-400"
             >
               Start a Project
-              <ArrowUpRight />
-            </a>
+              <ArrowRight />
+            </Link>
             <a href={mailto()} className="block text-center text-sm text-mist hover:text-bone">
               <EmailAddress />
             </a>

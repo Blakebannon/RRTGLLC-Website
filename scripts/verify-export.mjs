@@ -10,12 +10,20 @@
  * match the canonical URL, parseable JSON-LD with the expected entity types,
  * an exact sitemap, a crawlable robots.txt, image alt/dimensions, and no
  * development hosts, preview hosts or local filesystem paths in the output.
+ *
+ * Inquiry form: exactly one form, only on /contact, posting to Web3Forms with
+ * the public access key and honeypot; direct email fallback present; CSP
+ * allows Web3Forms and nothing broader; no private-credential patterns.
  */
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 
 const OUT = "out";
 const EMAIL = "blake.bannon@redrockstechnologygroup.com";
+/** Web3Forms public form access key (browser-visible by design) and its only allowed endpoint. */
+const WEB3FORMS_ENDPOINT = "https://api.web3forms.com/submit";
+const WEB3FORMS_ACCESS_KEY = "71e4e78a-a2c6-48b4-b1ac-191dc1a03cf4";
+const FORM_ROUTE = "/contact";
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://redrockstechnologygroup.com").replace(/\/$/, "");
 const ROUTES = [
   "/",
@@ -107,7 +115,10 @@ for (const file of htmlFiles) {
   const html = readFileSync(file, "utf8");
   const name = relative(OUT, file).split(sep).join("/");
   if (/lorem ipsum/i.test(html)) fail(`${name}: contains placeholder text`);
-  if (/<form[\s>]/i.test(html)) fail(`${name}: contains a <form>; contact is email-only in this release`);
+  const forms = html.match(/<form\b[^>]*>/gi) ?? [];
+  if (name === `${FORM_ROUTE.slice(1)}.html`) {
+    if (forms.length !== 1) fail(`${name}: expected exactly one inquiry form, found ${forms.length}`);
+  } else if (forms.length) fail(`${name}: contains a <form>; the inquiry form belongs only on ${FORM_ROUTE}`);
   for (const [, href] of html.matchAll(/<a\b[^>]*\shref="([^"]*)"/g)) {
     links++;
     if (href === "" || href === "#") fail(`${name}: empty or "#" link`);
@@ -236,6 +247,58 @@ if (/^\s*Disallow:\s*\/(_next|images)/im.test(robots)) fail("robots.txt blocks a
 
 const headers = readFileSync(join(OUT, "_headers"), "utf8");
 if (/X-Robots-Tag/i.test(headers)) fail("_headers sets X-Robots-Tag; production must remain indexable");
+
+/* ------------------------------------------------------- Inquiry form */
+
+{
+  const html = readFileSync(routeFile(FORM_ROUTE), "utf8");
+  const form = html.match(/<form\b[^>]*>([\s\S]*?)<\/form>/i);
+  if (!form) fail(`${FORM_ROUTE}: inquiry form missing`);
+  else {
+    const [tag, inner] = [form[0].slice(0, form[0].indexOf(">") + 1), form[1]];
+    if (attr(tag, /\saction="([^"]*)"/) !== WEB3FORMS_ENDPOINT) fail(`${FORM_ROUTE}: form must post to ${WEB3FORMS_ENDPOINT}`);
+    if (!/\smethod="post"/i.test(tag)) fail(`${FORM_ROUTE}: form must use POST`);
+    const hidden = (n) => attr(inner, new RegExp(`<input[^>]*name="${n}"[^>]*value="([^"]*)"`)) ?? attr(inner, new RegExp(`<input[^>]*value="([^"]*)"[^>]*name="${n}"`));
+    if (hidden("access_key") !== WEB3FORMS_ACCESS_KEY) fail(`${FORM_ROUTE}: Web3Forms access_key missing or unexpected`);
+    const botcheck = inner.match(/<input\b[^>]*name="botcheck"[^>]*>/)?.[0] ?? "";
+    if (!/type="checkbox"/.test(botcheck) || !/display:\s*none/.test(botcheck)) fail(`${FORM_ROUTE}: hidden Web3Forms botcheck honeypot missing`);
+    for (const field of ["name", "email", "service", "message"]) {
+      const el = inner.match(new RegExp(`<(input|select|textarea)[^>]*name="${field}"[^>]*>`))?.[0];
+      if (!el || !/\srequired(=""|\s|>|\/)/.test(el)) fail(`${FORM_ROUTE}: required field "${field}" missing or not required`);
+    }
+    for (const field of ["company", "phone", "budget"]) {
+      if (!new RegExp(`name="${field}"`).test(inner)) fail(`${FORM_ROUTE}: optional field "${field}" missing`);
+    }
+    for (const [, id] of inner.matchAll(/<(?:input|select|textarea)\b(?![^>]*type="(?:hidden|checkbox)")[^>]*\sid="([^"]+)"/g)) {
+      if (!inner.includes(`for="${id}"`)) fail(`${FORM_ROUTE}: form control #${id} has no <label>`);
+    }
+  }
+  if (!html.includes(`href="mailto:${EMAIL}`)) fail(`${FORM_ROUTE}: direct email fallback link missing`);
+  if (!/href="\/privacy"/.test(html)) fail(`${FORM_ROUTE}: form consent text should link the Privacy Policy`);
+}
+
+// The only Web3Forms URL anywhere in the output (HTML and client JS) is the submit endpoint.
+const shipped = walk(OUT).filter((f) => /\.(html|js|txt)$/.test(f));
+for (const file of shipped) {
+  const content = readFileSync(file, "utf8");
+  const name = relative(OUT, file).split(sep).join("/");
+  for (const [url] of content.matchAll(/https?:\/\/[a-z0-9.-]*web3forms\.com[^"'`\s)\\]*/gi)) {
+    if (url !== WEB3FORMS_ENDPOINT) fail(`${name}: unexpected Web3Forms URL ${url}`);
+  }
+  // Private credentials must never ship. The Web3Forms access key is public by design and is not matched here.
+  if (/sk_(live|test)_[0-9a-zA-Z]{10,}|-----BEGIN [A-Z ]*PRIVATE KEY-----|AKIA[0-9A-Z]{16}|gh[pousr]_[A-Za-z0-9]{30,}|xox[abprs]-[A-Za-z0-9-]{10,}/.test(content)) {
+    fail(`${name}: contains what looks like a private credential`);
+  }
+}
+
+// CSP: allow the Web3Forms API for fetch and native form posts, and nothing broader.
+const csp = headers.match(/Content-Security-Policy:\s*(.+)/)?.[1] ?? "";
+const directive = (d) => csp.match(new RegExp(`(?:^|;)\\s*${d}\\s+([^;]+)`))?.[1]?.trim().split(/\s+/) ?? [];
+for (const d of ["connect-src", "form-action"]) {
+  const sources = directive(d);
+  if (!sources.includes("https://api.web3forms.com")) fail(`_headers: CSP ${d} does not allow https://api.web3forms.com`);
+  if (sources.some((src) => src === "*" || src === "https:" || src.includes("*."))) fail(`_headers: CSP ${d} is overly broad`);
+}
 
 if (errors.length) {
   console.error(`✗ ${errors.length} problem(s) found:\n  - ${errors.join("\n  - ")}`);
