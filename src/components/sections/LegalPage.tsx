@@ -8,18 +8,20 @@ export function LegalPage({
   title,
   path,
   updated,
+  dateLabel = "Last updated",
   children,
 }: {
   title: string;
   path: string;
   updated: string;
+  dateLabel?: string;
   children: ReactNode;
 }) {
   const crumbs = [{ name: title, path }];
   return (
     <>
       <JsonLd data={breadcrumbSchema(crumbs)} />
-      <PageHero breadcrumbs={crumbs} title={title} intro={<p className="label text-mist-dim">Last updated {updated}</p>} />
+      <PageHero breadcrumbs={crumbs} title={title} intro={<p className="label text-mist-dim">{dateLabel} {updated}</p>} />
       <Container size="narrow" className="py-16 sm:py-24">
         <div className="prose-rrtg">{children}</div>
       </Container>

@@ -2,6 +2,7 @@ import { mailto, site } from "@/data/site";
 import { pageMetadata } from "@/lib/metadata";
 import { LegalPage } from "@/components/sections/LegalPage";
 import { EmailAddress } from "@/components/ui/EmailAddress";
+import Link from "next/link";
 
 /*
  * Starting document describing how this website currently works technically.
@@ -22,6 +23,9 @@ export default function PrivacyPage() {
         This policy explains how {site.legalName} (&ldquo;Red Rocks Technology Group,&rdquo; &ldquo;we&rdquo; or
         &ldquo;us&rdquo;) handles information in connection with this website and with inquiries you send us. We aim to
         collect as little personal information as possible.
+      </p>
+      <p>
+        For our Android games, see the separate <Link href="/no-ads-games/privacy">NO-ADS GAMES privacy policy</Link>.
       </p>
 
       <h2>Information we collect</h2>

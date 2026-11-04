@@ -37,6 +37,7 @@ const ROUTES = [
   "/about",
   "/contact",
   "/privacy",
+  "/no-ads-games/privacy",
   "/terms",
 ];
 /**

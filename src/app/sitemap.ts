@@ -18,6 +18,7 @@ const routes = [
   "/contact",
   // /products is omitted until it has published content (see src/data/navigation.ts).
   "/privacy",
+  "/no-ads-games/privacy",
   "/terms",
 ];
 
